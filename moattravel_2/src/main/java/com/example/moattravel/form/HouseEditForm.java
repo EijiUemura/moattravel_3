@@ -5,11 +5,19 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+//全フィールドに値をセットするための引数つきコンストラクタを自動生成
+//編集するために今回はつけた
+@AllArgsConstructor
 
-public class HouseRegisterForm {
+public class HouseEditForm {
+	//土のデータを更新するかの情報がいるため
+	@NotNull
+	private Integer id;
+	
 	@NotBlank(message = "民宿名を入力してください。")
 	private String name;
 	
@@ -34,7 +42,6 @@ public class HouseRegisterForm {
 	
 	@NotBlank(message = "電話番号を入力してください。")
 	private String phoneNumber;
-	
 	
 
 }
