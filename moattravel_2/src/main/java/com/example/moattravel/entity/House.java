@@ -12,7 +12,7 @@ import lombok.Data;
 
 @Entity
 @Table(name = "houses")
-@Data
+@Data 
 
 public class House {
 
