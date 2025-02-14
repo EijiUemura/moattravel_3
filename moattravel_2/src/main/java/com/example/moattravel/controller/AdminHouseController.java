@@ -22,68 +22,67 @@ import com.example.moattravel.form.HouseRegisterForm;
 import com.example.moattravel.repository.HouseRepository;
 import com.example.moattravel.service.HouseService;
 
-
 @Controller
 //このコントローラーのURL
 @RequestMapping("/admin/houses")
 
 public class AdminHouseController {
-	
+
 	private final HouseRepository houseRepository;
 	private final HouseService houseService;
-	
-	public AdminHouseController (HouseRepository houseRepository, HouseService houseService) {
-		
+
+	public AdminHouseController(HouseRepository houseRepository, HouseService houseService) {
+
 		this.houseRepository = houseRepository;
 		this.houseService = houseService;
 	}
-	
+
 	@GetMapping
-	public String index(Model model, 
-						@PageableDefault(page = 0, size = 10,sort = "id", direction = Direction.ASC)Pageable pageable,
-						//検索キーワードの取得
-						@RequestParam(name = "keyword", required = false) String keyword) {
-//		List<House> houses = houseRepository.findAll();
+	public String index(Model model,
+			@PageableDefault(page = 0, size = 10, sort = "id", direction = Direction.ASC) Pageable pageable,
+			//検索キーワードの取得
+			@RequestParam(name = "keyword", required = false) String keyword) {
+		//		List<House> houses = houseRepository.findAll();
 		Page<House> housePage;
-		
-		if(keyword != null && !keyword.isEmpty()) {
+
+		if (keyword != null && !keyword.isEmpty()) {
 			housePage = houseRepository.findByNameLike("%" + keyword + "%", pageable);
-		} else { 
+		} else {
 			housePage = houseRepository.findAll(pageable);
 		}
-		
-//		model.addAttribute("houses", houses);
+
+		//		model.addAttribute("houses", houses);
 		model.addAttribute("housePage", housePage);
 		model.addAttribute("keyword", keyword);
-		
+
 		return "admin/houses/index";
 	}
-	
+
 	@GetMapping("{id}")
-	public String show(@PathVariable (name = "id")Integer id, Model model) {
-		
+	public String show(@PathVariable(name = "id") Integer id, Model model) {
+
 		House house = houseRepository.getReferenceById(id);
-		
+
 		model.addAttribute("house", house);
-		
+
 		return "admin/houses/show";
 	}
-	
+
 	@GetMapping("/register")
 	public String register(Model model) {
 		model.addAttribute("houseRegisterForm", new HouseRegisterForm());
-		
+
 		return "admin/houses/register";
 	}
-	
+
 	@PostMapping("/create")
 	//                   送信されたデータを割り当てる
 	public String create(@ModelAttribute @Validated HouseRegisterForm houseRegisterForm,
 			BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-		if(bindingResult.hasErrors()) {
-			
+		if (bindingResult.hasErrors()) {
+
 			return "admin/houses/register";
-	
+
 		}
 		//データ登録
 		houseService.create(houseRegisterForm);
@@ -91,24 +90,34 @@ public class AdminHouseController {
 		//戻れないようにしている
 		return "redirect://admin/houses";
 	}
-	
+
 	@GetMapping("/{id}/edit")
-	public String edit (@PathVariable(name = "id") Integer id, Model model) {
+	public String edit(@PathVariable(name = "id") Integer id, Model model) {
 		//データベースからIDを取得する
 		House house = houseRepository.getReferenceById(id);
 		//画像のファイル名を取得
 		String imageName = house.getImageName();
-		
-		HouseEditForm houseEditForm = new HouseEditForm(house.getId(),house.getName(),null,
-														house.getDescription(),house.getPrice(),house.getCapacity(),
-														house.getPostalCode(),house.getAddress(),house.getPhoneNumber());
-		
+
+		HouseEditForm houseEditForm = new HouseEditForm(house.getId(), house.getName(), null,
+				house.getDescription(), house.getPrice(), house.getCapacity(),
+				house.getPostalCode(), house.getAddress(), house.getPhoneNumber());
+
 		model.addAttribute("imageName", imageName);
-		
+
 		model.addAttribute("houseEditForm", houseEditForm);
-		
+
 		return "admin/houses/edit";
 	}
-	
+
+	@PostMapping("/{id}/update")
+	public String update(@ModelAttribute @Validated HouseEditForm houseEditForm, BindingResult bindingResult,
+			RedirectAttributes redirectAttributes) {
+		if (bindingResult.hasErrors()) {
+			return "admin/houses/edit";
+		}
+		houseService.update(houseEditForm);
+		redirectAttributes.addFlashAttribute("successMessage", "民宿情報を編集しました。");
+		return "redirect:/admin/houses";
+	}
 
 }
